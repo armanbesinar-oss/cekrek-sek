@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cekrek Sek · Kasir Photobooth</title>
+  <meta name="description" content="Sistem kasir modern untuk usaha photobooth Cekrek Sek" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- SheetJS untuk export Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ======== TOAST NOTIFICATION ======== -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- ======== MODAL KONFIRMASI HAPUS ======== -->
+  <div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-icon">🗑️</div>
+      <h3 id="modal-title">Hapus Transaksi?</h3>
+      <p>Tindakan ini tidak bisa dibatalkan. Data transaksi akan terhapus permanen.</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="modal-cancel">Batal</button>
+        <button class="btn-danger" id="modal-confirm">Ya, Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== LOADING OVERLAY ======== -->
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-spinner">
+      <div class="spinner-ring"></div>
+      <p>Memproses...</p>
+    </div>
+  </div>
+
+  <!-- ======== HEADER ======== -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">📸</div>
+        <div class="brand-text">
+          <span class="brand-name">Cekrek Sek</span>
+          <span class="brand-sub">Kasir Photobooth</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="dark-mode-toggle" class="icon-btn" title="Toggle Dark Mode" aria-label="Toggle dark mode">
+          <span class="icon-sun">☀️</span>
+          <span class="icon-moon">🌙</span>
+        </button>
+        <div class="connection-dot" id="connection-dot" title="Status koneksi database"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======== MAIN APP ======== -->
+  <main class="app-main">
+
+    <!-- ====== DASHBOARD STATISTIK ====== -->
+    <section class="section-stats" aria-label="Statistik">
+      <div class="stats-grid">
+
+        <div class="stat-card stat-today-trx">
+          <div class="stat-icon">🧾</div>
+          <div class="stat-content">
+            <span class="stat-value" id="stat-today-trx">0</span>
+            <span class="stat-label">Transaksi Hari Ini</span>
+          </div>
+          <div class="stat-glow"></div>
+        </div>
+
+        <div class="stat-card stat-today-income">
+          <div class="stat-icon">💸</div>
+          <div class="stat-content">
+            <span class="stat-value" id="stat-today-income">Rp 0</span>
+            <span class="stat-label">Pemasukan Hari Ini</span>
+          </div>
+          <div class="stat-glow"></div>
+        </div>
+
+        <div class="stat-card stat-total-trx">
+          <div class="stat-icon">📊</div>
+          <div class="stat-content">
+            <span class="stat-value" id="stat-total-trx">0</span>
+            <span class="stat-label">Total Transaksi</span>
+          </div>
+          <div class="stat-glow"></div>
+        </div>
+
+        <div class="stat-card stat-total-income">
+          <div class="stat-icon">💰</div>
+          <div class="stat-content">
+            <span class="stat-value" id="stat-total-income">Rp 0</span>
+            <span class="stat-label">Total Pemasukan</span>
+          </div>
+          <div class="stat-glow"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ====== FORM TRANSAKSI ====== -->
+    <section class="section-form" aria-label="Form Transaksi Baru">
+      <div class="glass-card form-card">
+        <div class="card-header">
+          <h2>✨ Transaksi Baru</h2>
+          <button class="btn-ghost btn-reset" id="btn-reset" title="Reset form">↺ Reset</button>
+        </div>
+
+        <div class="form-body">
+
+          <!-- Nama Pembeli -->
+          <div class="field-group">
+            <label for="input-name" class="field-label">Nama Pembeli</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input
+                type="text"
+                id="input-name"
+                class="field-input"
+                placeholder="Contoh: Siti Rahayu"
+                maxlength="60"
+                autocomplete="off"
+                autocapitalize="words"
+              />
+            </div>
+            <span class="field-error" id="error-name"></span>
+          </div>
+
+          <!-- Jumlah Sesi -->
+          <div class="field-group">
+            <label for="input-sesi" class="field-label">Jumlah Sesi Foto</label>
+            <div class="sesi-control">
+              <button class="sesi-btn" id="btn-minus" aria-label="Kurangi sesi">−</button>
+              <input
+                type="number"
+                id="input-sesi"
+                class="field-input sesi-input"
+                value="1"
+                min="1"
+                max="99"
+                inputmode="numeric"
+              />
+              <button class="sesi-btn" id="btn-plus" aria-label="Tambah sesi">+</button>
+            </div>
+            <span class="field-error" id="error-sesi"></span>
+          </div>
+
+          <!-- Info Harga -->
+          <div class="price-info-row">
+            <div class="price-chip">
+              <span class="price-chip-label">Harga per sesi</span>
+              <span class="price-chip-value">Rp 3.000</span>
+            </div>
+            <div class="price-chip price-chip-total">
+              <span class="price-chip-label">Total Bayar</span>
+              <span class="price-chip-value" id="display-total">Rp 3.000</span>
+            </div>
+          </div>
+
+          <!-- Tombol Bayar -->
+          <button class="btn-pay" id="btn-pay" aria-label="Proses pembayaran">
+            <span class="btn-pay-icon">💳</span>
+            <span class="btn-pay-text">Bayar Sekarang</span>
+          </button>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== RIWAYAT TRANSAKSI ====== -->
+    <section class="section-history" aria-label="Riwayat Transaksi">
+      <div class="glass-card history-card">
+        <div class="card-header">
+          <h2>📋 Riwayat Transaksi</h2>
+          <div class="export-group">
+            <button class="btn-export" id="btn-export-csv" title="Export CSV">⬇ CSV</button>
+            <button class="btn-export btn-export-excel" id="btn-export-excel" title="Export Excel">⬇ Excel</button>
+          </div>
+        </div>
+
+        <!-- Filter & Search -->
+        <div class="filter-bar">
+          <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input
+              type="search"
+              id="input-search"
+              class="search-input"
+              placeholder="Cari nama pembeli..."
+              autocomplete="off"
+            />
+          </div>
+          <input type="date" id="filter-date" class="date-input" title="Filter berdasarkan tanggal" />
+          <button class="btn-ghost" id="btn-clear-filter" title="Hapus filter">✕</button>
+        </div>
+
+        <!-- Tabel Transaksi -->
+        <div class="table-wrapper" id="table-wrapper">
+          <!-- Diisi oleh JS -->
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======== MODAL PRINT RECEIPT ======== -->
+  <div id="receipt-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="receipt-title">
+    <div class="receipt-card">
+      <div class="receipt-header">
+        <div class="receipt-logo">📸</div>
+        <h3 id="receipt-title">Cekrek Sek</h3>
+        <p class="receipt-sub">Photobooth Studio</p>
+        <div class="receipt-divider"></div>
+      </div>
+      <div class="receipt-body" id="receipt-body">
+        <!-- Diisi JS saat print -->
+      </div>
+      <div class="receipt-footer">
+        <div class="receipt-divider"></div>
+        <p>Terima kasih sudah foto bareng kami! 🤍</p>
+        <p class="receipt-tagline">Kenangan terbaik dimulai dari sini.</p>
+      </div>
+      <div class="receipt-actions">
+        <button class="btn-secondary" id="btn-close-receipt">Tutup</button>
+        <button class="btn-pay btn-print" id="btn-do-print">🖨️ Print</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== CONFIG & APP SCRIPTS ======== -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>

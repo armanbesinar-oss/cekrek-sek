@@ -17,7 +17,6 @@
  */
 
 const SUPABASE_URL = "https://swcgohezrjhhrvlripex.supabase.co/rest/v1/"; // ← Ganti dengan URL project kamu
-const SUPABASE_ANON_KEY =
-  "sb_publishable_6mEeuyTLIlFIIJWbTvO_Lw_MhcfPgnr"; // ← Ganti dengan anon key kamu
+const SUPABASE_ANON_KEY = "sb_publishable_6mEeuyTLIlFIIJWbTvO_Lw_MhcfPgnr"; // ← Ganti dengan anon key kamu
 const TABLE_NAME = "transaksi"; // Nama tabel di Supabase
 const HARGA_PER_SESI = 3000; // Harga per sesi (Rupiah)

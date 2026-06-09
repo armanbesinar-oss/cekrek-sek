@@ -16,7 +16,7 @@
  * ============================================================
  */
 
-const SUPABASE_URL = "sb_publishable_6mEeuyTLIlFIIJWbTvO_Lw_MhcfPgnr"; // ← Ganti dengan URL project kamu
+const SUPABASE_URL = "https://swcgohezrjhhrvlripex.supabase.co/rest/v1/"; // ← Ganti dengan URL project kamu
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3Y2dvaGV6cmpoaHJ2bHJpcGV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5MzU1NzcsImV4cCI6MjA5NjUxMTU3N30.HTpOm_UCYQs-x05vVsxuEe8rZ13ODmFex4ENOaAMx4Q"; // ← Ganti dengan anon key kamu
 const TABLE_NAME = "transaksi"; // Nama tabel di Supabase
